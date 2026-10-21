@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173f8a">
+<title>Universal GPA and CGPA Calculator</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+<header><div class="brand"><div class="logo">U</div><div><strong>UNIVERSAL GPA AND CGPA CALCULATOR</strong><small>Academic performance, made clear.</small></div></div><span class="local-badge">● Private browser storage</span></header>
+<div class="app">
+<aside class="sidebar">
+<button class="nav active" data-view="dashboard">▦ Dashboard</button>
+<button class="nav" data-view="gpa">＋ Calculate GPA</button>
+<button class="nav" data-view="cgpa">∑ Calculate CGPA</button>
+<button class="nav" data-view="history">◷ Semester History</button>
+<button class="nav" data-view="cohort">▦ Class Analysis</button>
+<button class="nav" data-view="settings">⚙ Grade & Class Settings</button>
+<button class="nav" data-view="help">ⓘ How it works</button>
+</aside>
+<main>
+<section id="dashboard" class="view active">
+<div class="hero"><div><p class="eyebrow">YOUR ACADEMIC WORKSPACE</p><h1 id="welcome">Welcome to your dashboard</h1><p>Calculate individual results or analyze a whole class using imported student records.</p></div><div class="hero-mark">GPA<br><b>↗</b></div></div>
+<div class="profile panel"><h2>Student profile</h2><div class="grid four"><label>Name<input id="profileName" placeholder="Your name"></label><label>Institution<input id="institution" placeholder="College / university"></label><label>Place<input id="place" placeholder="City"></label><label>Course / department<input id="course" placeholder="B.E. ECE"></label></div><button class="primary" id="saveProfile">Save profile</button><span id="profileMsg" class="message"></span></div>
+<div class="stats"><div class="stat"><span>Saved semesters</span><b id="statSemesters">0</b></div><div class="stat"><span>Overall CGPA</span><b id="statCgpa">—</b></div><div class="stat"><span>Eligible credits</span><b id="statCredits">0</b></div><div class="stat"><span>Class records</span><b id="statClass">0</b></div></div>
+<div class="panel"><div class="panel-head"><h2>Semester performance</h2><button class="secondary" data-goto="history">View history</button></div><div id="dashboardChart" class="chart"></div></div>
+</section>
+<section id="gpa" class="view"><h1>Calculate GPA</h1><p class="muted">Enter subject credits and grades. Use the official grade-point rules for your institution.</p><div class="panel"><div class="table-scroll"><table><thead><tr><th>#</th><th>Subject</th><th>Subject code (optional)</th><th>Credits</th><th>Grade</th><th></th></tr></thead><tbody id="gpaRows"></tbody></table></div><div class="button-row"><button class="secondary" id="addGpaRow">+ Add subject</button><button class="primary" id="calculateGpa">Calculate GPA</button><button class="secondary" id="clearGpa">Clear</button></div><div id="gpaResult" class="result">Your GPA will appear here.</div><div class="button-row save-row"><label>Semester<select id="saveSemester"></select></label><button class="primary" id="saveSemesterResult">Save semester result</button></div><p id="gpaMsg" class="message"></p></div></section>
+<section id="cgpa" class="view"><h1>Calculate CGPA</h1><div class="panel"><h2>Saved semester results</h2><div id="savedCgpa" class="result">No saved results yet.</div></div><div class="panel"><h2>Manual CGPA</h2><p class="muted">Enter semester GPA and eligible credits.</p><div class="table-scroll"><table><thead><tr><th>Semester</th><th>GPA</th><th>Eligible credits</th><th></th></tr></thead><tbody id="manualRows"></tbody></table></div><div class="button-row"><button class="secondary" id="addManual">+ Add semester</button><button class="primary" id="calcManual">Calculate manual CGPA</button></div><div id="manualResult" class="result">Enter semester GPA and credits.</div></div></section>
+<section id="history" class="view"><h1>Semester History</h1><div class="panel"><div class="table-scroll"><table><thead><tr><th>Semester</th><th>GPA</th><th>Eligible credits</th><th>Saved at</th><th>Action</th></tr></thead><tbody id="historyRows"></tbody></table></div><button class="danger" id="clearHistory">Delete all results</button><p id="historyMsg" class="message"></p></div></section>
+<section id="cohort" class="view">
+<div class="hero compact"><div><p class="eyebrow">CLASS ANALYSIS</p><h1>Bulk student result workflow</h1><p>Upload results, import the credit master separately, review extracted rows, then calculate each student's semester GPA and CGPA.</p></div></div>
+<div class="stepper"><span class="step active">1 · Upload results</span><span class="step">2 · Import credits</span><span class="step">3 · Review records</span><span class="step">4 · Calculate</span></div>
+<div class="panel"><h2>Step 1 — Upload student result files</h2><p class="muted">Supported: Excel, CSV, PDF, DOCX, TXT and images. For reliable extraction, use a clear table with Register Number, Student Name, Semester, Subject Code, Subject Name and Grade. You may select multiple files.</p><label class="upload"><span class="upload-icon">⇧</span><b>Select result files</b><input id="resultFiles" type="file" multiple accept=".xlsx,.xls,.csv,.txt,.pdf,.docx,.jpg,.jpeg,.png,.webp"><small>Extracted data is a draft. Review and correct every row before calculation.</small></label><div class="button-row"><button class="primary" id="extractResults">Read and extract files</button><button class="secondary" id="downloadTemplate">Download CSV template</button><button class="secondary" id="clearDraft">Clear draft</button></div><p id="uploadMsg" class="message"></p></div>
+<div class="panel"><h2>Step 2 — Import subject codes, names and credits</h2><p class="muted">Upload the credit master separately. Required columns: Subject Code, Subject Name, Credits. The same subject code reuses the imported credit value. Unmatched codes remain flagged; no credits are guessed.</p><label class="upload slim"><b>Select subject-credit master</b><input id="creditFile" type="file" accept=".xlsx,.xls,.csv,.txt"></label><div class="button-row"><button class="primary" id="importCredits">Import credit master</button><button class="secondary" id="downloadCreditTemplate">Download credit template</button><button class="secondary" id="clearCredits">Clear credit master</button></div><p id="creditMsg" class="message"></p><div id="creditSummary" class="muted"></div></div>
+<div class="panel"><div class="panel-head"><div><h2>Step 3 — Review and edit extracted records</h2><p class="muted">You can edit register number, name, semester, code, subject, grade and credits before calculation.</p></div><button class="secondary" id="addRecord">+ Add row</button></div><div class="filter-bar"><label>Filter semester<select id="semesterFilter"><option value="all">All semesters</option></select></label><label>Find student / code<input id="recordSearch" placeholder="Search register number, name or subject code"></label></div><div class="table-scroll editable-wrap"><table class="editable-table"><thead><tr><th>Register No.</th><th>Student name</th><th>Semester</th><th>Subject code</th><th>Subject name</th><th>Grade</th><th>Credits</th><th>Validation</th><th>Action</th></tr></thead><tbody id="recordRows"></tbody></table></div><div class="button-row"><button class="primary" id="saveDraft">Save draft locally</button><button class="secondary" id="applyCreditMatches">Match imported credits</button><button class="secondary" id="exportRecords">Export reviewed CSV</button></div><p id="reviewMsg" class="message"></p></div>
+<div class="panel"><h2>Step 4 — Calculate individual semester GPA and CGPA</h2><p class="muted">Records are grouped by register number and semester. GPA uses only rows with valid grade points and positive credits. Fix all warnings for complete results. This is an academic helper, not an official result system.</p><div class="button-row"><button class="primary" id="calculateClass">Calculate class results</button><button class="secondary" id="exportClass">Export class summary CSV</button></div><p id="classMsg" class="message"></p><div class="table-scroll"><table><thead><tr><th>Register No.</th><th>Student name</th><th>Semester</th><th>Subjects included</th><th>Credits</th><th>GPA</th><th>CGPA to semester</th><th>Warnings</th></tr></thead><tbody id="classResults"></tbody></table></div><div class="stats small-stats"><div class="stat"><span>Students</span><b id="classStudents">0</b></div><div class="stat"><span>Semester results</span><b id="classSemesters">0</b></div><div class="stat"><span>Rows needing review</span><b id="classWarnings">0</b></div></div></div>
+</section>
+<section id="settings" class="view"><h1>Grade & Class Settings</h1><div class="panel"><h2>Grading scale</h2><div class="grid two"><label>Maximum GPA scale<select id="scaleMax"><option value="4">4.0</option><option value="5">5.0</option><option value="10" selected>10.0</option><option value="100">100-point</option></select></label><label>Grade rules (one per line: grade=points)<textarea id="gradeRules" rows="7">O=10
+A+=9
+A=8
+B+=7
+B=6
+C=5
+D=0
+RA=0
+U=0
+F=0
+AB=0
+W=0</textarea></label></div><p class="muted">Edit these values to match your institution's official rules. Grades such as RA/U/F are treated as zero only if listed here; whether they should count toward credits is institution-specific.</p><button class="primary" id="saveSettings">Save grade settings</button><p id="settingsMsg" class="message"></p></div><div class="panel"><h2>Local data</h2><p>Data is stored in this browser using localStorage. It does not automatically sync to another device or browser. Export reviewed CSV files for backup.</p><button class="danger" id="resetApp">Clear all locally saved app data</button></div></section>
+<section id="help" class="view"><h1>How it works</h1><div class="panel"><h2>GPA formula</h2><p>GPA = Σ(grade points × subject credits) ÷ Σ(subject credits).</p><h2>CGPA formula</h2><p>CGPA = Σ(semester GPA × eligible semester credits) ÷ Σ(eligible semester credits). The class analysis calculates cumulative values using the included subject rows and their credits.</p><h2>Data extraction</h2><p>File extraction is best-effort. OCR and PDF/Word extraction can misread scanned or complex layouts. The extracted rows are editable so that you can verify them before calculation.</p><h2>Privacy</h2><p>Data stays in local browser storage unless you manually export/share files. Clearing browser site data may remove it. Keep your own backup.</p><h2>Credit rules</h2><p>Subject credits are matched by subject code from the separately imported credit master. Missing codes, grades, semesters or credits are flagged; they are never silently invented.</p></div></section>
+</main></div>
+<footer>UNIVERSAL GPA AND CGPA CALCULATOR · Blue / orange responsive dashboard · Verify institutional rules before official use.</footer>
+<script src="script.js"></script>
+</body></html>
